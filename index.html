@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Local Citation Network</title>
+    <title>Local Citation Network for Cita</title>
     <meta charset="utf-8">
     <meta name="description" content="This web app aims to help scientists with their literature review using reference data from Microsoft Academic, Crossref and OpenCitations. It visualizes citation networks defined by the references of a given set of input articles and the most cited references are suggested for further review.">
     <meta name="author" content="Tim Woelfle">
+    <meta name="author" content="Diego de la Hera">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="lib/buefy.min.css">
     <script src="lib/vue.js"></script>
@@ -141,7 +142,7 @@
   </head>
   <body>
     <section id="app">
-      <b-navbar style="border-bottom: 1px solid #dbdbdb; overflow-x:auto; overflow-y: hidden; scrollbar-width: thin">
+      <b-navbar v-if="false" style="border-bottom: 1px solid #dbdbdb; overflow-x:auto; overflow-y: hidden; scrollbar-width: thin">
         <template slot="brand">
           <a class="navbar-item" href="">
             <h1 class="title">Local Citation Network</h1>

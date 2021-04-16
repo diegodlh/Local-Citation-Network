@@ -1,13 +1,43 @@
 /* Local Citation Network v0.96 (GPL-3) */
 /* by Tim Wölfle */
 /* https://timwoelfle.github.io/Local-Citation-Network */
+/* Adapted for Cita addon for Zotero */
+/* by Diego de la Hera */
 
 /* global fetch, localStorage, vis, Vue, Buefy */
+/* global window */
 
 'use strict'
 
 const arrSum = arr => arr.reduce((a, b) => a + b, 0)
 const arrAvg = arr => arrSum(arr) / arr.length
+
+/* Cita mock API */
+
+const itemMap = window.arguments[0];
+
+function cita (itemKeys, responseFunction) {
+  return new Promise((resolve) => {
+    resolve(itemKeys.map((itemId) => itemMap.get(itemId)));
+  }).then((data) => responseFunction(data));
+}
+
+function citaResponseToArticleArray(data) {
+  return data.map((item) => {
+    const authors = item.item.getCreators().map((creator) => ({ LN: creator.lastName, FN: creator.firstName }));
+    if (!authors.length) authors.push({ LN: undefined });
+    return {
+      id: item.key,
+      doi: item.doi,
+      title: item.title,
+      authors: authors,
+      year: item.item.getField('year'),
+      journal: item.item.getField('publicationTitle'),
+      references: item.citations ? item.citations.map((citation) => citation.target.key) : [],
+      abstract: item.item.getField('abstractNote')
+    }
+  });
+}
 
 /* Crossref API */
 
@@ -197,7 +227,9 @@ function initCitationNetwork (app) {
         return []
       }
     })
-  }).flat(2)
+  })
+  .reduce((acc, val) => acc.concat(val), [])
+  .reduce((acc, val) => acc.concat(val), [])
 
   // Sort by rank of year
   const years = Array.from(new Set(articles.map(article => article.year).sort()))
@@ -298,7 +330,9 @@ function initAuthorNetwork (app, minPublications = undefined) {
   const links = {}
 
   // Get authors from more than one publication
-  authorGroups.flat().forEach(author => { authors[author] = (authors[author] || 0) + 1 })
+  authorGroups.reduce(
+    (acc, val) => acc.concat(val), []
+  ).forEach(author => { authors[author] = (authors[author] || 0) + 1 })
 
   if (!minPublications) {
     minPublications = 2
@@ -328,7 +362,9 @@ function initAuthorNetwork (app, minPublications = undefined) {
 
   const edges = Object.keys(links).map(indiv1 => Object.keys(links[indiv1]).map(indiv2 => {
     return { from: indiv1, to: indiv2, value: links[indiv1][indiv2], title: indiv1 + ' & ' + indiv2 + ' (' + links[indiv1][indiv2] / 2 + ' collaboration(s) among source, input & suggested articles)' }
-  })).flat(2)
+  }))
+  .reduce((acc, val) => acc.concat(val), [])
+  .reduce((acc, val) => acc.concat(val), [])
 
   const nodes = authorsWithMinPubs.map(author => {
     return {
@@ -408,7 +444,7 @@ const vm = new Vue({
   el: '#app',
   data: {
     // Settings
-    API: 'Microsoft Academic', // Use 'Microsoft Academic' API as default, other options: 'Crossref' and 'OpenCitations'
+    API: 'Cita', // Use 'Microsoft Academic' API as default, other options: 'Crossref' and 'OpenCitations'
     customKeyMA: undefined,
     maxTabs: 5,
     autosaveResults: false,
@@ -873,6 +909,8 @@ const vm = new Vue({
       } else if (this.API === 'Crossref') {
         // In Crossref the API also returns references as DOIs
         return crossrefWorks('doi:' + ids.join(',doi:'), response, count)
+      } else if (this.API === 'Cita') {
+        return cita(ids, response, count);
       } else {
         // In OpenCitations API also returns references as DOIs
         return openCitationsMetadata(ids.join('__'), response, count)
@@ -883,6 +921,8 @@ const vm = new Vue({
         return microsoftAcademicResponseToArticleArray(data, sourceReferences)
       } else if (this.API === 'Crossref') {
         return crossrefResponseToArticleArray(data, sourceReferences)
+      } else if (this.API === 'Cita') {
+        return citaResponseToArticleArray(data, sourceReferences);
       } else {
         return openCitationsResponseToArticleArray(data, sourceReferences)
       }
@@ -1028,12 +1068,12 @@ const vm = new Vue({
       if (localStorage.customKeyMA) this.customKeyMA = localStorage.customKeyMA
       if (localStorage.API) this.API = localStorage.API
     } catch (e) {
-      localStorage.clear()
+      // localStorage.clear()
       console.log("Couldn't load cached networks")
     }
 
     // Set API according to link
-    if (urlParams.has('API') && ['Microsoft Academic', 'Crossref', 'OpenCitations'].includes(urlParams.get('API'))) {
+    if (urlParams.has('API') && ['Microsoft Academic', 'Crossref', 'OpenCitations', 'Cita'].includes(urlParams.get('API'))) {
       this.API = urlParams.get('API')
     }
 
@@ -1059,6 +1099,19 @@ const vm = new Vue({
       } else {
         this.importList()
       }
+    }
+
+    if (this.API === 'Cita') {
+      const listOfKeys = urlParams.has('listOfKeys') ? urlParams.get('listOfKeys').split(',') : [];
+      this.listOfDOIs = listOfKeys.map((key) => itemMap.get(key).doi);
+      this.listName = 'Cita';
+
+      this.isLoading = true
+      this.setNewSource(
+        { references: listOfKeys, citations: [] },
+        this.listName,
+        this.listName
+      );
     }
 
     // Linked to FAQ?

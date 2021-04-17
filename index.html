@@ -254,7 +254,7 @@
                 </div>
               </template>
               
-              <b-table-column field="numberInSourceReferences" label="#" :visible="currentGraph.API === 'Crossref' || !currentGraph.source.id" sortable v-slot="props"> <!-- FIXME doesn't work for files -->
+              <b-table-column field="numberInSourceReferences" label="#" :visible="currentGraph.API === 'Crossref' || (!currentGraph.source.id && currentGraph.API !== 'Cita')" sortable v-slot="props"> <!-- FIXME doesn't work for files -->
                 {{ props.row.numberInSourceReferences }}
               </b-table-column>
               <b-table-column label="Title" v-slot="props">

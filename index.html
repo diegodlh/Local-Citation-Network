@@ -261,8 +261,18 @@
                 <!-- id is for scrolling to row when network node is clicked -->
                 <span :id="props.row.id">
                   {{ props.row.isSource ? 'Source: ' : ''  }}
-                  <template v-if="props.row.doi">
+                  <template v-if="currentGraph.API !== 'Cita' && props.row.doi">
                     <a :href="'https://doi.org/' + props.row.doi" target="_blank">{{ props.row.title }}</a>
+                  </template>
+                  <template v-else-if="currentGraph.API === 'Cita' && props.row.id.substr(0,3) !== 'tmp'">
+                    <a @click="e => {e.preventDefault(); openItem(props.row.id)}" href="">
+                      {{ props.row.title }}
+                    </a>
+                  </template>
+                  <template v-else-if="currentGraph.API === 'Cita' && props.row.url">
+                    <a @click="e => {e.preventDefault(); openUrl(props.row.url)}" href="">
+                      {{ props.row.title + ' \u21AA' }}
+                    </a>
                   </template>
                   <template v-else>
                     {{ props.row.title }}
@@ -384,8 +394,18 @@
               <b-table-column label="Title" v-slot="props">
                 <!-- id is for scrolling to row when network node is clicked -->
                 <span :id="props.row.id">
-                  <template v-if="props.row.doi">
+                  <template v-if="currentGraph.API !== 'Cita' && props.row.doi">
                     <a :href="'https://doi.org/' + props.row.doi" target="_blank">{{ props.row.title }}</a>
+                  </template>
+                  <template v-else-if="currentGraph.API === 'Cita' && props.row.id.substr(0,3) !== 'tmp'">
+                    <a @click="e => {e.preventDefault(); openItem(props.row.id)}" href="">
+                      {{ props.row.title }}
+                    </a>
+                  </template>
+                  <template v-else-if="currentGraph.API === 'Cita' && props.row.url">
+                    <a @click="e => {e.preventDefault(); openUrl(props.row.url)}" href="">
+                      {{ props.row.title + ' \u21AA' }}
+                    </a>
                   </template>
                   <template v-else>
                     {{ props.row.title }}

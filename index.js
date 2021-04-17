@@ -34,7 +34,8 @@ function citaResponseToArticleArray(data) {
       year: item.item.getField('year'),
       journal: item.item.getField('publicationTitle'),
       references: item.citations ? item.citations.map((citation) => citation.target.key) : [],
-      abstract: item.item.getField('abstractNote')
+      abstract: item.item.getField('abstractNote'),
+      url: item.url
     }
   });
 }
@@ -1038,7 +1039,9 @@ const vm = new Vue({
       this.editListOfDOIs = false
       this.isLoading = true
       this.setNewSource({ references: this.listOfDOIs, citations: [] }, this.listName, this.listName)
-    }
+    },
+    openItem: window.arguments && window.arguments[1],
+    openUrl: window.arguments && window.arguments[2],
   },
   created: function () {
     const urlParams = new URLSearchParams(window.location.search)

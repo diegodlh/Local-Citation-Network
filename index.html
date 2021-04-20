@@ -339,12 +339,15 @@
                   </b-tooltip>
                 </template>
                 <template v-slot="props">
-                  <b-tooltip label="Open new graph for the references of this article" position="is-left" type="is-dark">
+                  <b-tooltip v-if="currentGraph.API !== 'Cita'" label="Open new graph for the references of this article" position="is-left" type="is-dark">
                     <b-button @click.stop="clickOpenReferences(props.row)" type="is-primary" size="is-small"
                       :inverted="(selected === props.row) ? true : false"
                       :disabled="(isLoading || props.row.references.length === 0 || props.row.isSource) ? true : false">
                       {{ props.row.references.length }} ↻
                     </b-button>
+                  </b-tooltip>
+                  <b-tooltip v-else label="References in paper" dashed position="is-left" type="is-dark">
+                    {{ props.row.references.length }}
                   </b-tooltip>
                 </template>
               </b-table-column>
@@ -465,7 +468,7 @@
                   </b-tooltip>
                 </template>
               </b-table-column>
-              <b-table-column field="references.length" label="Ref" meta="References in paper" sortable>
+              <b-table-column field="references.length" label="Ref" meta="References in paper" :visible="currentGraph.API !== 'Cita'" sortable>
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
                     {{ column.label }}

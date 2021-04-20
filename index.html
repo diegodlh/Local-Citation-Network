@@ -289,7 +289,7 @@
                   {{ props.row.year }}
                 </b-tooltip>
               </b-table-column>
-              <b-table-column field="citationsCount" label="Cit" meta="Estimated global incoming citations (how many papers cite this one)" sortable>
+              <b-table-column field="citationsCount" label="Cit" meta="Estimated global incoming citations (how many papers cite this one)" :visible="currentGraph.API !== 'Cita'" sortable>
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
                     {{ column.label }}
@@ -422,7 +422,7 @@
                   {{ props.row.year }}
                 </b-tooltip>
               </b-table-column>
-              <b-table-column field="citationsCount" label="Cit" meta="Estimated global incoming citations (how many papers cite this one)" sortable>
+              <b-table-column field="citationsCount" label="Cit" meta="Estimated global incoming citations (how many papers cite this one)" :visible="currentGraph.API !== 'Cita'" sortable>
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
                     {{ column.label }}

@@ -618,14 +618,14 @@
             <div id="citationNetwork" style="height: 100%; cursor: pointer;"></div>
             <span style="position:absolute; top: 0px; left: 10px;"><a @click="fullscreenNetwork = !fullscreenNetwork;">({{ (fullscreenNetwork) ? 'show tables' : 'fullscreen network' }})</a></span>
             <span style="position:absolute; top: 0px; right: 0px">↑ newer articles</span>
-            <span style="position:absolute; bottom: 0px; left: 10px;"><a @click="indexFAQ = 'citation-network'; showFAQ = true;" href="#citation-network">(how to read this network)</a></span>
+            <span style="position:absolute; bottom: 0px; left: 10px;"><a @click="e => { if (currentGraph.API === 'Cita') e.preventDefault(); indexFAQ = 'citation-network'; showFAQ = true; }" href="#citation-network">(how to read this network)</a></span>
             <span style="position:absolute; bottom: 0px; right: 0px">↓ older articles</span>
           </b-tab-item>
           <b-tab-item>
             <template slot="header"><h2 class="title is-4">Co-authorship network</h2></template>
             <div id="authorNetwork" style="height: 100%; cursor: pointer;"></div>
             <span style="position:absolute; top: 0px; left: 10px"><a @click="fullscreenNetwork = !fullscreenNetwork;">({{ (fullscreenNetwork) ? 'show tables' : 'fullscreen network' }})</a></span>
-            <span style="position:absolute; top: 0px; right: 0px"><a @click="indexFAQ = 'author-network'; showFAQ = true;" href="#author-network">(how to read this network)</a></span>
+            <span style="position:absolute; top: 0px; right: 0px"><a @click="e => { if (currentGraph.API === 'Cita') e.preventDefault(); indexFAQ = 'author-network'; showFAQ = true; }" href="#author-network">(how to read this network)</a></span>
             <b-field :label="'(only authors with a minimum of ' + minPublications + ' local articles are shown)'" custom-class="small"
               style="position:absolute; bottom: 0px; left: 10px">
               <b-slider v-model="minPublications" lazy :min="2" :max="10" ticks size="is-small"></b-slider>
@@ -646,7 +646,7 @@
         </div>
       </section>
       
-      <b-modal :active.sync="showFAQ" :width="840" scroll="keep">
+      <b-modal v-if="currentGraph.API !== 'Cita'" :active.sync="showFAQ" :width="840" scroll="keep">
         <div class="card">
           <div class="card-header-title">
             <h3 class="title is-3">Instructions</h3>
@@ -932,6 +932,39 @@
             <div class="card-content content">
               <p>
                 I'm Tim Wölfle from Germany and started creating this project during the literature review for my Master's thesis. I've often manually scanned reference lists of papers to identify seminal articles and thought this must be automized. You can contact me on <a href="https://twitter.com/timwoelfle" target="_blank">Twitter</a> or by <a href="mailto:local-citation-network@timwoelfle.de">e-mail</a>.
+              </p>
+            </div>
+          </b-collapse>
+        </div>
+      </b-modal>
+      <b-modal v-else :active.sync="showFAQ" :width="840" scroll="keep">
+        <div class="card">
+          <b-collapse class="card" id="citation-network" :open="indexFAQ === 'citation-network'" @open="indexFAQ = 'citation-network'" animation="none">
+            <div slot="trigger" slot-scope="props" class="card-header" role="buton">
+              <h4 class="card-header-title">How to read the citation network?</h4>
+            </div>
+            <div class="card-content content">
+              <p>
+                Zoom by scrolling and pan by dragging. Each node (= vertex) represents an article. They are ordered by year from top (newer) to bottom (older), with each year colored differently. The size of the nodes depends on the sum of their "in-degree", the number of citations the paper received from the input articles, and their 'out-degree', the number of input articles they cite. The local 'in-degree' is not always proportional to the global citation count. Input articles are circle-shaped nodes ( ● ). Up-pointing triangles (▲) represent incoming suggestions, which are cited by the input articles but not part of them themselves.
+              </p>
+              <p>
+                Each edge (= link / arrow) represents a reference and citation at the same time: They are references from their outgoing nodes and citations for their incoming nodes. Usually papers can only cite older papers, hence edges tend to point downwards (or sidewards for citations of the same year). Technically this is called a directed acyclic graph.
+              </p>
+            </div>
+          </b-collapse>
+          <b-collapse class="card" id="author-network" :open="indexFAQ === 'author-network'" @open="indexFAQ = 'author-network'" animation="none">
+            <div slot="trigger" slot-scope="props" class="card-header" role="buton">
+              <h4 class="card-header-title">How to read the co-authorship network?</h4>
+            </div>
+            <div class="card-content content">
+              <p>
+                This "local" author network shows the commonest authors among the input and suggested articles. Depending on the discipline, the number of (co)authors among a set of multiple articles can quickly rise to the hundreds, which is why this author network only shows authors with a minimum number of local articles (not to be mistaken with their global number of publications, which is usually much higher). The default minimum number of local articles is determined so that this network shows no more than 50 authors, but it can be changed with the slider at the bottom from 2 to 10.
+              </p>
+              <p>
+                Each node (= vertex) represents an author. The size depends on their number of local articles and the color depends on the author-cluster they first appear in. Click authors to filter input & suggested articles, ctrl+click to filter for more than one author.
+              </p>
+              <p>
+                Each edge (= link) represents a collaboration between two authors among the input and suggested articles, the width indicating the number of collaborations. Click edges to filter input & suggested articles.
               </p>
             </div>
           </b-collapse>

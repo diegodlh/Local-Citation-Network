@@ -359,7 +359,13 @@
             </template>
             <div class="content">
               <p>
-                <a @click="indexFAQ = 'incoming-suggestions'; showFAQ = true;" href="#incoming-suggestions">Incoming suggestions</a> are the locally most cited references from the input articles. They are generally older. Maximum:
+                <template v-if="currentGraph.API !== 'Cita'">
+                  <a @click="indexFAQ = 'incoming-suggestions'; showFAQ = true;" href="#incoming-suggestions">Incoming suggestions</a>
+                </template>
+                <template v-else>
+                  Incoming suggestions
+                </template>
+                are the locally most cited references from the input articles. They are generally older. Maximum:
                 <select v-model="maxIncomingSuggestions">
                   <template v-for="val in [...Array(currentGraph.incomingSuggestions.length+1).keys()]">
                     <option :value="val" :selected="val == maxIncomingSuggestions">{{ val }}</option>

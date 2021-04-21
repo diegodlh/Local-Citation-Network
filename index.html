@@ -207,7 +207,7 @@
                   </span>
                 </p>
               </template>
-              <p v-else>
+              <p v-else-if="currentGraph.API !== 'Cita'">
                 Based on DOIs from the following file / list: {{ currentGraph.tabLabel }}
                 <b-tooltip dashed multilined position="is-bottom" type="is-dark"
                   label="Copy this link's address and share! (Right-click → 'Copy Link Location')">
@@ -215,11 +215,25 @@
                 </b-tooltip>
               </p>
               <p>
+                <template v-if="currentGraph.API === 'Cita'">
+                  Based on local citation data
+                </template>
+                <template v-else>
                 Data retrieved through <a @click="indexFAQ = 'switch-api'; showFAQ = true;" href="#switch-api">{{ currentGraph.API }}</a> API on {{ new Date(currentGraph.timestamp).toLocaleDateString() }}
+                </template>
                 <b-tooltip dashed multilined type="is-dark" position="is-bottom" :label="completenessLabel">
                   <a @click="indexFAQ = 'completeness'; showFAQ = true;" href="#completeness"
                     :style="'color: ' + ((completenessPercent > 40) ? '' : '#ff3860')">
                     (estimated completeness: {{ completenessPercent }}%).
+                  </a>
+                </b-tooltip>
+              </p>
+              <p v-if="currentGraph.API === 'Cita' && listOfDOIs.length">
+                Open with
+                <b-tooltip dashed multilined position="is-bottom" type="is-dark"
+                  :label="`Open new graph for ${listOfDOIs.length} articles with DOI using citation data retrieved through external APIs`">
+                  <a @click="e => { e.preventDefault(); openUrl('https://timwoelfle.github.io/Local-Citation-Network/?listOfDOIs=' + listOfDOIs.join(',')) }">
+                    Local Citation Network
                   </a>
                 </b-tooltip>
               </p>

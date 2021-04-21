@@ -532,7 +532,7 @@ const vm = new Vue({
     completenessLabel: function () {
       let label = ''
       // Show number of "original references" only for Crossref for source-based-graphs and for all listOfDOIs (i.e. file / bookmarklet) graphs, for which they can be estimated
-      if (this.currentGraph.API === 'Crossref' || !this.currentGraph.source.id) {
+      if (this.currentGraph.API === 'Crossref' || (!this.currentGraph.source.id && this.currentGraph.API !== 'Cita')) {
         if (this.currentGraph.source.id) {
           label += 'Source and '
         }
@@ -1106,7 +1106,13 @@ const vm = new Vue({
 
     if (this.API === 'Cita') {
       const listOfKeys = urlParams.has('listOfKeys') ? urlParams.get('listOfKeys').split(',') : [];
-      this.listOfDOIs = listOfKeys.map((key) => itemMap.get(key).doi);
+      this.listOfDOIs = listOfKeys.reduce(
+        (dois, key) => {
+          const doi = itemMap.get(key).doi;
+          if (doi) dois.push(doi);
+          return dois;
+        }, []
+      );
       this.listName = 'Cita';
 
       this.isLoading = true

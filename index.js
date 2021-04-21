@@ -639,7 +639,7 @@ const vm = new Vue({
         // Reset newSourceDOI (otherwise it cannot be called twice in a row with different APIs)
         this.newSourceDOI = undefined
 
-        this.$buefy.toast.open({
+        if (this.API !== 'Cita') this.$buefy.toast.open({
           message: 'New query sent to ' + this.API + '.<br>This may take a while, depending on the number of references and API workload.',
           duration: 4000,
           queue: false

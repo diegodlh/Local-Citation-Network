@@ -22,24 +22,6 @@ function cita (itemKeys, responseFunction) {
   }).then((data) => responseFunction(data));
 }
 
-function citaResponseToArticleArray(data) {
-  return data.map((item) => {
-    const authors = item.item.getCreators().map((creator) => ({ LN: creator.lastName, FN: creator.firstName }));
-    if (!authors.length) authors.push({ LN: undefined });
-    return {
-      id: item.key,
-      doi: item.doi,
-      title: item.title,
-      authors: authors,
-      year: item.item.getField('year'),
-      journal: item.item.getField('publicationTitle'),
-      references: item.citations ? item.citations.map((citation) => citation.target.key) : [],
-      abstract: item.item.getField('abstractNote'),
-      url: item.url
-    }
-  });
-}
-
 /* Crossref API */
 
 function crossrefWorks (expression, responseFunction, count) {
@@ -923,7 +905,7 @@ const vm = new Vue({
       } else if (this.API === 'Crossref') {
         return crossrefResponseToArticleArray(data, sourceReferences)
       } else if (this.API === 'Cita') {
-        return citaResponseToArticleArray(data, sourceReferences);
+        return data;
       } else {
         return openCitationsResponseToArticleArray(data, sourceReferences)
       }

@@ -14,7 +14,7 @@ const arrAvg = arr => arrSum(arr) / arr.length
 
 /* Cita mock API */
 
-const itemMap = window.arguments[0];
+const itemMap = window.arguments && window.arguments[0];
 
 function cita (itemKeys, responseFunction) {
   return new Promise((resolve) => {
@@ -514,7 +514,16 @@ const vm = new Vue({
     completenessLabel: function () {
       let label = ''
       // Show number of "original references" only for Crossref for source-based-graphs and for all listOfDOIs (i.e. file / bookmarklet) graphs, for which they can be estimated
-      if (this.currentGraph.API === 'Crossref' || (!this.currentGraph.source.id && this.currentGraph.API !== 'Cita')) {
+      if (this.currentGraph.API === 'Cita') {
+        label = this.getString(
+          'input-articles.info.completeness.tooltip',
+          [
+            this.inputHasReferences,
+            this.inputArticlesWithoutSource.length,
+            Math.round(this.inputHasReferences / this.inputArticlesWithoutSource.length * 100)
+          ]
+        );
+      } else if (this.currentGraph.API === 'Crossref' || !this.currentGraph.source.id) {
         if (this.currentGraph.source.id) {
           label += 'Source and '
         }
@@ -1024,6 +1033,7 @@ const vm = new Vue({
     },
     openItem: window.arguments && window.arguments[1],
     openUrl: window.arguments && window.arguments[2],
+    getString: window.arguments && window.arguments[3]
   },
   created: function () {
     const urlParams = new URLSearchParams(window.location.search)
@@ -1087,6 +1097,7 @@ const vm = new Vue({
     }
 
     if (this.API === 'Cita') {
+      window.document.title = this.getString('title');
       const listOfKeys = urlParams.has('listOfKeys') ? urlParams.get('listOfKeys').split(',') : [];
       this.listOfDOIs = listOfKeys.reduce(
         (dois, key) => {

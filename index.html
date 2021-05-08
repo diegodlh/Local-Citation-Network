@@ -179,7 +179,7 @@
         <b-tabs v-model="showArticlesTab" class="column is-three-fifths" size="is-small" :style="'display: ' + ((fullscreenNetwork) ? 'none' : 'block')">
           <b-tab-item value="inputArticles">
             <template slot="header">
-              <h2 class="title is-4">Input articles ({{ currentGraph.input.length }})</h2>
+              <h2 class="title is-4">{{ getString('input-articles.header', currentGraph.input.length) }}</h2>
             </template>
             <div class="content">
               <template v-if="currentGraph.source.id">
@@ -216,7 +216,7 @@
               </p>
               <p>
                 <template v-if="currentGraph.API === 'Cita'">
-                  Based on local citation data
+                  {{ getString('input-articles.info.source') }}
                 </template>
                 <template v-else>
                 Data retrieved through <a @click="indexFAQ = 'switch-api'; showFAQ = true;" href="#switch-api">{{ currentGraph.API }}</a> API on {{ new Date(currentGraph.timestamp).toLocaleDateString() }}
@@ -224,28 +224,28 @@
                 <b-tooltip dashed multilined type="is-dark" position="is-bottom" :label="completenessLabel">
                   <a @click="indexFAQ = 'completeness'; showFAQ = true;" href="#completeness"
                     :style="'color: ' + ((completenessPercent > 40) ? '' : '#ff3860')">
-                    (estimated completeness: {{ completenessPercent }}%).
+                    ({{ getString('input-articles.info.completeness', completenessPercent) }}).
                   </a>
                 </b-tooltip>
               </p>
               <p v-if="currentGraph.API === 'Cita' && listOfDOIs.length">
-                Open with
+                {{ getString('input-articles.info.open-external', 'Local Citation Network') }}
                 <b-tooltip dashed multilined position="is-bottom" type="is-dark"
-                  :label="`Open new graph for ${listOfDOIs.length} articles with DOI using citation data retrieved through external APIs`">
+                  :label="getString('input-articles.info.open-external.tooltip', listOfDOIs.length)">
                   <a @click="e => { e.preventDefault(); openUrl('https://timwoelfle.github.io/Local-Citation-Network/?listOfDOIs=' + listOfDOIs.join(',')) }">
-                    Local Citation Network
+                    &#8618
                   </a>
                 </b-tooltip>
               </p>
             </div>
             <b-field>
               <b-select v-model="filterColumn">
-                <option value="titleAbstract">Title & Abstract</option>
-                <option value="authors">Authors</option>
-                <option value="year">Year</option>
-                <option value="journal">Journal</option>
+                <option value="titleAbstract">{{ getString('filter.select.title-abstract') }}</option>
+                <option value="authors">{{ getString('filter.select.authors') }}</option>
+                <option value="year">{{ getString('filter.select.year') }}</option>
+                <option value="journal">{{ getString('filter.select.journal') }}</option>
               </b-select>
-              <b-input v-model="filterString" icon="magnify" placeholder="Filter articles..." expanded
+              <b-input v-model="filterString" icon="magnify" :placeholder="getString('filter.input.placeholder')" expanded
                 :icon-right="filterString ? 'close' : undefined"
                 icon-right-clickable
                 @icon-right-click="filterString=''"></b-input>
@@ -271,7 +271,7 @@
               <b-table-column field="numberInSourceReferences" label="#" :visible="currentGraph.API === 'Crossref' || (!currentGraph.source.id && currentGraph.API !== 'Cita')" sortable v-slot="props"> <!-- FIXME doesn't work for files -->
                 {{ props.row.numberInSourceReferences }}
               </b-table-column>
-              <b-table-column label="Title" v-slot="props">
+              <b-table-column :label="getString('table.column.title.label')" v-slot="props">
                 <!-- id is for scrolling to row when network node is clicked -->
                 <span :id="props.row.id">
                   {{ props.row.isSource ? 'Source: ' : ''  }}
@@ -293,12 +293,12 @@
                   </template>
                 </span>
               </b-table-column>
-              <b-table-column field="authors" label="First Author" v-slot="props">
+              <b-table-column field="authors" :label="getString('table.column.first-author.label')" v-slot="props">
                 <b-tooltip dashed multilined :label="authorString(props.row.authors)" position="is-left" type="is-dark">
                   {{ props.row.authors[0].LN }}
                 </b-tooltip>
               </b-table-column>
-              <b-table-column field="year" label="Year" sortable v-slot="props">
+              <b-table-column field="year" :label="getString('table.column.year.label')" sortable v-slot="props">
                 <b-tooltip dashed :label="props.row.journal" position="is-left" type="is-dark">
                   {{ props.row.year }}
                 </b-tooltip>
@@ -320,7 +320,7 @@
                   </b-tooltip>
                 </template>
               </b-table-column>
-              <b-table-column field="inDegree" label="InDeg" meta="In-Degree: Number of incoming citations from input articles"
+              <b-table-column field="inDegree" :label="getString('table.column.in-degree.label')" :meta="getString('table.column.in-degree.tooltip')"
                 sortable :custom-sort="sortInDegreeWrapper">
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
@@ -328,12 +328,12 @@
                   </b-tooltip>
                 </template>
                 <template v-slot="props">
-                  <b-tooltip label="In-Degree: Number of incoming citations from input articles" dashed position="is-left" type="is-dark">
+                  <b-tooltip :label="getString('table.column.in-degree.tooltip')" dashed position="is-left" type="is-dark">
                     {{ inDegree(props.row.id) }}
                   </b-tooltip>
                 </template>
               </b-table-column>
-              <b-table-column field="outDegree" label="OutDeg" meta="Out-Degree: Number of references (outgoing citations) to input articles"
+              <b-table-column field="outDegree" :label="getString('table.column.out-degree.label')" :meta="getString('table.column.out-degree.tooltip')"
                 sortable :custom-sort="sortOutDegreeWrapper">
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
@@ -341,12 +341,12 @@
                   </b-tooltip>
                 </template>
                 <template v-slot="props">
-                  <b-tooltip label="Out-Degree: Number of references (outgoing citations) to input articles" dashed position="is-left" type="is-dark">
+                  <b-tooltip :label="getString('table.column.out-degree.tooltip')" dashed position="is-left" type="is-dark">
                     {{ outDegree(props.row.id) }}
                   </b-tooltip>
                 </template>
               </b-table-column>
-              <b-table-column field="references.length" label="Ref" meta="References in paper" sortable>
+              <b-table-column field="references.length" :label="getString('table.column.references.label')" :meta="getString('table.column.references.tooltip')" sortable>
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
                     {{ column.label }}
@@ -360,7 +360,7 @@
                       {{ props.row.references.length }} ↻
                     </b-button>
                   </b-tooltip>
-                  <b-tooltip v-else label="References in paper" dashed position="is-left" type="is-dark">
+                  <b-tooltip v-else :label="getString('table.column.references.tooltip')" dashed position="is-left" type="is-dark">
                     {{ props.row.references.length }}
                   </b-tooltip>
                 </template>
@@ -369,17 +369,17 @@
           </b-tab-item>
           <b-tab-item value="incomingSuggestions" v-if="currentGraph.incomingSuggestions.length">
             <template slot="header">
-              <h2 class="title is-4">Incoming suggestions (▲ {{ maxIncomingSuggestions }})</h2>
+              <h2 class="title is-4">{{ getString('incoming-suggestions.header', ['▲', maxIncomingSuggestions]) }}</h2>
             </template>
             <div class="content">
               <p>
-                <template v-if="currentGraph.API !== 'Cita'">
-                  <a @click="indexFAQ = 'incoming-suggestions'; showFAQ = true;" href="#incoming-suggestions">Incoming suggestions</a>
+                <template v-if="currentGraph.API === 'Cita'">
+                  {{ getString('incoming-suggestions.info') }}
+                  {{ getString('incoming-suggestions.info.max') }}:
                 </template>
                 <template v-else>
-                  Incoming suggestions
+                  <a @click="indexFAQ = 'incoming-suggestions'; showFAQ = true;" href="#incoming-suggestions">Incoming suggestions</a> are the locally most cited references from the input articles. They are generally older. Maximum:
                 </template>
-                are the locally most cited references from the input articles. They are generally older. Maximum:
                 <select v-model="maxIncomingSuggestions">
                   <template v-for="val in [...Array(currentGraph.incomingSuggestions.length+1).keys()]">
                     <option :value="val" :selected="val == maxIncomingSuggestions">{{ val }}</option>
@@ -390,12 +390,12 @@
             <!-- The following b-field and b-table are near identical with those of input articles. Different lines are indicated by comment. -->
             <b-field>
               <b-select v-model="filterColumn">
-                <option value="titleAbstract">Title & Abstract</option>
-                <option value="authors">Authors</option>
-                <option value="year">Year</option>
-                <option value="journal">Journal</option>
+                <option value="titleAbstract">{{ getString('filter.select.title-abstract') }}</option>
+                <option value="authors">{{ getString('filter.select.authors') }}</option>
+                <option value="year">{{ getString('filter.select.year') }}</option>
+                <option value="journal">{{ getString('filter.select.journal') }}</option>
               </b-select>
-              <b-input v-model="filterString" icon="magnify" placeholder="Filter articles..." expanded
+              <b-input v-model="filterString" icon="magnify" :placeholder="getString('filter.input.placeholder')" expanded
                 :icon-right="filterString ? 'close' : undefined"
                 icon-right-clickable
                 @icon-right-click="filterString=''"></b-input>
@@ -414,7 +414,7 @@
                 </div>
               </template>
               
-              <b-table-column label="Title" v-slot="props">
+              <b-table-column :label="getString('table.column.title.label')" v-slot="props">
                 <!-- id is for scrolling to row when network node is clicked -->
                 <span :id="props.row.id">
                   <template v-if="currentGraph.API !== 'Cita' && props.row.doi">
@@ -435,12 +435,12 @@
                   </template>
                 </span>
               </b-table-column>
-              <b-table-column field="authors" label="First Author" v-slot="props">
+              <b-table-column field="authors" :label="getString('table.column.first-author.label')" v-slot="props">
                 <b-tooltip dashed multilined :label="authorString(props.row.authors)" position="is-left" type="is-dark">
                   {{ props.row.authors[0].LN }}
                 </b-tooltip>
               </b-table-column>
-              <b-table-column field="year" label="Year" sortable v-slot="props">
+              <b-table-column field="year" :label="getString('table.column.year.label')" sortable v-slot="props">
                 <b-tooltip dashed :label="props.row.journal" position="is-left" type="is-dark">
                   {{ props.row.year }}
                 </b-tooltip>
@@ -462,7 +462,7 @@
                   </b-tooltip>
                 </template>
               </b-table-column>
-              <b-table-column field="inDegree" label="InDeg" meta="In-Degree: Number of incoming citations from input articles"
+              <b-table-column field="inDegree" :label="getString('table.column.in-degree.label')" :meta="getString('table.column.in-degree.tooltip')"
                 sortable :custom-sort="sortInDegreeWrapper">
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
@@ -470,12 +470,12 @@
                   </b-tooltip>
                 </template>
                 <template v-slot="props">
-                  <b-tooltip label="In-Degree: Number of incoming citations from input articles" dashed position="is-left" type="is-dark">
+                  <b-tooltip :label="getString('table.column.in-degree.tooltip')" dashed position="is-left" type="is-dark">
                     {{ inDegree(props.row.id) }}
                   </b-tooltip>
                 </template>
               </b-table-column>
-              <b-table-column field="outDegree" label="OutDeg" meta="Out-Degree: Number of references (outgoing citations) to input articles"
+              <b-table-column field="outDegree" :label="getString('table.column.out-degree.label')" :meta="getString('table.column.out-degree.tooltip')"
                 sortable :custom-sort="sortOutDegreeWrapper">
                 <template v-slot:header="{ column }">
                   <b-tooltip :label="column.meta" dashed position="is-left" type="is-dark">
@@ -483,7 +483,7 @@
                   </b-tooltip>
                 </template>
                 <template v-slot="props">
-                  <b-tooltip label="Out-Degree: Number of references (outgoing citations) to input articles" dashed position="is-left" type="is-dark">
+                  <b-tooltip :label="getString('table.column.out-degree.tooltip')" dashed position="is-left" type="is-dark">
                     {{ outDegree(props.row.id) }}
                   </b-tooltip>
                 </template>
@@ -633,20 +633,20 @@
 
         <b-tabs v-model="showAuthorNetwork" class="column" size="is-small" :animated="false">
           <b-tab-item>
-            <template slot="header"><h2 class="title is-4">Citation network</h2></template>
+            <template slot="header"><h2 class="title is-4">{{ getString('networks.citation.header') }}</h2></template>
             
             <div id="citationNetwork" style="height: 100%; cursor: pointer;"></div>
-            <span style="position:absolute; top: 0px; left: 10px;"><a @click="fullscreenNetwork = !fullscreenNetwork;">({{ (fullscreenNetwork) ? 'show tables' : 'fullscreen network' }})</a></span>
-            <span style="position:absolute; top: 0px; right: 0px">↑ newer articles</span>
-            <span style="position:absolute; bottom: 0px; left: 10px;"><a @click="e => { if (currentGraph.API === 'Cita') e.preventDefault(); indexFAQ = 'citation-network'; showFAQ = true; }" href="#citation-network">(how to read this network)</a></span>
-            <span style="position:absolute; bottom: 0px; right: 0px">↓ older articles</span>
+            <span style="position:absolute; top: 0px; left: 10px;"><a @click="fullscreenNetwork = !fullscreenNetwork;">({{ (fullscreenNetwork) ? getString('networks.show-tables') : getString('networks.fullscreen') }})</a></span>
+            <span style="position:absolute; top: 0px; right: 0px">↑ {{ getString('networks.citation.newer-articles') }}</span>
+            <span style="position:absolute; bottom: 0px; left: 10px;"><a @click="e => { if (currentGraph.API === 'Cita') e.preventDefault(); indexFAQ = 'citation-network'; showFAQ = true; }" href="#citation-network">({{ getString('networks.how-to') }})</a></span>
+            <span style="position:absolute; bottom: 0px; right: 0px">↓ {{ getString('networks.citation.older-articles') }}</span>
           </b-tab-item>
           <b-tab-item>
-            <template slot="header"><h2 class="title is-4">Co-authorship network</h2></template>
+            <template slot="header"><h2 class="title is-4">{{ getString('networks.coauthorship.header') }}</h2></template>
             <div id="authorNetwork" style="height: 100%; cursor: pointer;"></div>
-            <span style="position:absolute; top: 0px; left: 10px"><a @click="fullscreenNetwork = !fullscreenNetwork;">({{ (fullscreenNetwork) ? 'show tables' : 'fullscreen network' }})</a></span>
-            <span style="position:absolute; top: 0px; right: 0px"><a @click="e => { if (currentGraph.API === 'Cita') e.preventDefault(); indexFAQ = 'author-network'; showFAQ = true; }" href="#author-network">(how to read this network)</a></span>
-            <b-field :label="'(only authors with a minimum of ' + minPublications + ' local articles are shown)'" custom-class="small"
+            <span style="position:absolute; top: 0px; left: 10px"><a @click="fullscreenNetwork = !fullscreenNetwork;">({{ (fullscreenNetwork) ? getString('networks.show-tables') : getString('networks.fullscreen') }})</a></span>
+            <span style="position:absolute; top: 0px; right: 0px"><a @click="e => { if (currentGraph.API === 'Cita') e.preventDefault(); indexFAQ = 'author-network'; showFAQ = true; }" href="#author-network">({{ getString('networks.how-to') }})</a></span>
+            <b-field :label="`(${getString('networks.coauthorship.slider', minPublications)})`" custom-class="small"
               style="position:absolute; bottom: 0px; left: 10px">
               <b-slider v-model="minPublications" lazy :min="2" :max="10" ticks size="is-small"></b-slider>
             </b-field>
@@ -961,31 +961,31 @@
         <div class="card">
           <b-collapse class="card" id="citation-network" :open="indexFAQ === 'citation-network'" @open="indexFAQ = 'citation-network'" animation="none">
             <div slot="trigger" slot-scope="props" class="card-header" role="buton">
-              <h4 class="card-header-title">How to read the citation network?</h4>
+              <h4 class="card-header-title">{{ getString('faq.citation.header')}}</h4>
             </div>
             <div class="card-content content">
               <p>
-                Zoom by scrolling and pan by dragging. Each node (= vertex) represents an article. They are ordered by year from top (newer) to bottom (older), with each year colored differently. The size of the nodes depends on the sum of their "in-degree", the number of citations the paper received from the input articles, and their 'out-degree', the number of input articles they cite. The local 'in-degree' is not always proportional to the global citation count. Input articles are circle-shaped nodes ( ● ). Up-pointing triangles (▲) represent incoming suggestions, which are cited by the input articles but not part of them themselves.
+                {{ getString('faq.citation.content.p1', [' ● ', '▲']) }}
               </p>
               <p>
-                Each edge (= link / arrow) represents a reference and citation at the same time: They are references from their outgoing nodes and citations for their incoming nodes. Usually papers can only cite older papers, hence edges tend to point downwards (or sidewards for citations of the same year). Technically this is called a directed acyclic graph.
+                {{ getString('faq.citation.content.p2') }}
               </p>
             </div>
           </b-collapse>
           <b-collapse class="card" id="author-network" :open="indexFAQ === 'author-network'" @open="indexFAQ = 'author-network'" animation="none">
             <div slot="trigger" slot-scope="props" class="card-header" role="buton">
-              <h4 class="card-header-title">How to read the co-authorship network?</h4>
+              <h4 class="card-header-title">{{ getString('faq.coauthorship.header')}}</h4>
             </div>
             <div class="card-content content">
               <p>
-                This "local" author network shows the commonest authors among the input and suggested articles. Depending on the discipline, the number of (co)authors among a set of multiple articles can quickly rise to the hundreds, which is why this author network only shows authors with a minimum number of local articles (not to be mistaken with their global number of publications, which is usually much higher). The default minimum number of local articles is determined so that this network shows no more than 50 authors, but it can be changed with the slider at the bottom from 2 to 10.
+                {{ getString('faq.coauthorship.content.p1') }}
               </p>
               <p>
-                Each node (= vertex) represents an author. The size depends on their number of local articles and the color depends on the author-cluster they first appear in. Click authors to filter input & suggested articles, ctrl+click to filter for more than one author.
-              </p>
+                {{ getString('faq.coauthorship.content.p2') }}
+                </p>
               <p>
-                Each edge (= link) represents a collaboration between two authors among the input and suggested articles, the width indicating the number of collaborations. Click edges to filter input & suggested articles.
-              </p>
+                {{ getString('faq.coauthorship.content.p3') }}
+                </p>
             </div>
           </b-collapse>
         </div>
@@ -1011,7 +1011,7 @@
         </div>
       </b-modal>
       <span style="position:absolute; bottom: 10px; left: 10px">
-        Adapted from Tim Wölfe's <a @click="e => {e.preventDefault(); openUrl('https://timwoelfle.github.io/Local-Citation-Network/')}" href="">Local Citation Network</a>
+        {{ getString('footer', ['Tim Wölfe', 'Local Citation Network']) }} <a @click="e => {e.preventDefault(); openUrl('https://timwoelfle.github.io/Local-Citation-Network/')}" href="">&#8618</a>
       </span>
     </section>
 

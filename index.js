@@ -621,7 +621,7 @@ const vm = new Vue({
     }
   },
   methods: {
-    setNewSource: function (source, label = undefined, title = undefined) {
+    setNewSource: async function (source, label = undefined, title = undefined) {
       try {
         // Some papers are in Crossref / MA but don't have references themselves
         if (!source) throw new Error(`DOI ${this.newSourceDOI} not found in ${this.API} API, try other API.`)
@@ -630,11 +630,18 @@ const vm = new Vue({
         // Reset newSourceDOI (otherwise it cannot be called twice in a row with different APIs)
         this.newSourceDOI = undefined
 
-        if (this.API !== 'Cita') this.$buefy.toast.open({
-          message: 'New query sent to ' + this.API + '.<br>This may take a while, depending on the number of references and API workload.',
-          duration: 4000,
-          queue: false
-        })
+        if (this.API === 'Cita') {
+          // some commands below seem to be blocking execution
+          // set a short delay to let window finish loading before them
+          // using window's load event doesn't work
+          await new Promise((resolve) => setTimeout(() => resolve(), 500));
+        } else {
+          this.$buefy.toast.open({
+            message: 'New query sent to ' + this.API + '.<br>This may take a while, depending on the number of references and API workload.',
+            duration: 4000,
+            queue: false
+          })
+        }
 
         // Get Input articles
         // filter(Boolean) is necessary because references array can contain empty items in order to preserve original order of DOIs from crossref

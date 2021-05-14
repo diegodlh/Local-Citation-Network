@@ -14,7 +14,12 @@ const arrAvg = arr => arrSum(arr) / arr.length
 
 /* Cita mock API */
 
-const itemMap = window.arguments && window.arguments[0];
+const {
+  itemMap,
+  openItem,
+  openUrl,
+  getString
+} = window.arguments[0] || {};
 
 function cita (itemKeys, responseFunction) {
   return new Promise((resolve) => {
@@ -344,7 +349,7 @@ function initAuthorNetwork (app, minPublications = undefined) {
   })))
 
   const edges = Object.keys(links).map(indiv1 => Object.keys(links[indiv1]).map(indiv2 => {
-    return { from: indiv1, to: indiv2, value: links[indiv1][indiv2], title: indiv1 + ' & ' + indiv2 + ' (' + links[indiv1][indiv2] / 2 + ' collaboration(s) among source, input & suggested articles)' }
+    return { from: indiv1, to: indiv2, value: links[indiv1][indiv2], title: getString('networks.coauthorship.edge', [indiv1, indiv2, links[indiv1][indiv2] / 2]) }
   }))
   .reduce((acc, val) => acc.concat(val), [])
   .reduce((acc, val) => acc.concat(val), [])
@@ -352,7 +357,7 @@ function initAuthorNetwork (app, minPublications = undefined) {
   const nodes = authorsWithMinPubs.map(author => {
     return {
       id: author,
-      title: author + ((app.authorString(app.currentGraph.source.authors).includes(author)) ? ' ((co)author of source article) (' : ' (') + authors[author] + ' publication(s) among input & suggested articles)',
+      title: author + ((app.authorString(app.currentGraph.source.authors).includes(author)) ? ' ((co)author of source article) (' : ' (') + getString('networks.coauthorship.node', authors[author]) + ')',
       group: authorGroups.map(group => group.includes(author)).indexOf(true),
       label: author.substr(author.lastIndexOf(' ') + 1),
       size: authors[author] * 3,
@@ -1038,9 +1043,9 @@ const vm = new Vue({
       this.isLoading = true
       this.setNewSource({ references: this.listOfDOIs, citations: [] }, this.listName, this.listName)
     },
-    openItem: window.arguments && window.arguments[1],
-    openUrl: window.arguments && window.arguments[2],
-    getString: window.arguments && window.arguments[3]
+    openItem: openItem,
+    openUrl: openUrl,
+    getString: getString
   },
   created: function () {
     const urlParams = new URLSearchParams(window.location.search)
